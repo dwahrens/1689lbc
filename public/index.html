@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="1689 London Baptist Confession">
+  <meta name="keywords"
+    content="church, baptist, reformed, 1689, london, baptist, confession, christian, confession, creed">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="public/css/bulma.min.css" />
+
+</head>
+
+<body>
+  <section id="vue">
+    <article class="hero is-dark is-bold">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title is-size-2 has-text-centered">1689 London Baptist Confession</h1>
+          <hr>
+          <div v-if="loading" class="is-loading">
+
+          </div>
+          <div v-if="error" class="is-error">
+            {{ error }}
+          </div>
+          <!-- Move this into a stickied navbar at the top using pagination -->
+          <!-- Add search to navbar -->
+          <div class="columns">
+            <div class="column has-text-centered">
+              <!-- if chapter prevChapter !== 1 -->
+              <button class="button is-info" v-on:click="id > 1 ? fetchData(--id) : returnNothing"
+                id="prevChapter">Previous Chapter</button>
+            </div>
+            <div class="column has-text-centerd">
+              <!-- Add a form here to select a chapter -->
+            </div>
+            <!-- Vue should bind to these two buttons -->
+            <div class="column has-text-centered">
+              <!-- if nextChapter !== 32 -->
+              <button class="button is-info" v-on:click="id < 32 ? fetchData(++id) : returnNothing"
+                id="nextChapter">Next
+                Chapter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="hero is-light">
+      <div class="hero-body">
+        <div class="container">
+          <h4 class="is-size-3 has-text-centered" v-if="chapterTitle">Chapter {{ chapterNumber }}. {{ chapterTitle }}
+          </h4>
+          <br>
+          <ol>
+            <li v-for="paragraph in chapterParagraphs" class="is-size-4">
+              <p class="is-size-5">{{ paragraph.text }}</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </article>
+  </section>
+  <script src="public/js/vue.js"></script>
+  <script>
+    let vue = new Vue({
+      el: '#vue',
+      data: {
+        chapterTitle: null,
+        chapterNumber: null,
+        chapterParagraphs: null,
+        id: 1,
+        loading: true,
+        error: false,
+      },
+      methods: {
+        fetchData: function (id) {
+          let self = this
+          const myRequest = new Request('/lbcf/' + id)
+
+          fetch(myRequest)
+            .then((response) => { return response.json() })
+            .then((data) => {
+              self.chapterTitle = data.title
+              self.chapterNumber = data.number
+              self.chapterParagraphs = data.paragraphs
+              // should think about using the localStorage option here
+              // self.id = parseInt(data.number)
+              self.loading = false
+            }).catch(error => { this.error = error })
+        },
+        returnNothing: function () {
+          return
+        }
+      },
+      mounted() {
+        this.fetchData(this.id)
+      }
+    })
+  </script>
+</body>
+
+</html>
